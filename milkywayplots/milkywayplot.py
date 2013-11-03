@@ -14,7 +14,17 @@ from matplotlib.transforms import Affine2D
 # annotated version
 # http://upload.wikimedia.org/wikipedia/commons/8/89/236084main_MilkyWay-full-annotated.jpg
 
-import urllib
+import astropy.utils.data as aud
+import os
+
+def getfile(url,fn=None):
+    if fn is None:
+        fn = os.path.split(url)[-1]
+    if not os.path.exists(fn):
+        with aud.get_readable_fileobj(url) as f:
+            with open(fn,'w') as of:
+                of.write(f.read())
+
 
 def get_image(mw_img_url="http://upload.wikimedia.org/wikipedia/commons/0/09/Milky_Way_2005.jpg"):
     """
@@ -23,7 +33,7 @@ def get_image(mw_img_url="http://upload.wikimedia.org/wikipedia/commons/0/09/Mil
     Annotated version here:
     http://upload.wikimedia.org/wikipedia/commons/8/89/236084main_MilkyWay-full-annotated.jpg
     """
-    urllib.urlretrieve(mw_img_url)
+    getfile(mw_img_url)
 
 def make_mw_plot(fig=None, mw_img_name = "Milky_Way_2005.jpg",
         solar_rad=8.5, fignum=5):
@@ -145,6 +155,8 @@ def make_mw_plot(fig=None, mw_img_name = "Milky_Way_2005.jpg",
     return ax, ax_pixgrid, gc_polar, hc_polar
 
 if __name__=="__main__":
+    get_image()
+
     ax, ax_pixgrid, gcp,hcp = make_mw_plot()
     ax.grid(color="w")
     ax_pixgrid.grid(color="r")
