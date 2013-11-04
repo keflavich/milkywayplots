@@ -93,7 +93,7 @@ class MilkywayPlot(object):
 
         self.setup_milkyway_plot()
 
-    def setup_milkyway_plot(self):
+    def setup_milkyway_plot(self, zorder=2):
 
         ax1,ax2 = make_polar_axis(self.figure)
         self.figure.add_subplot(ax1)
@@ -107,12 +107,12 @@ class MilkywayPlot(object):
         #dropboxdeletedthis OKim = OKzone.astype('int')+OKgal.astype('int')
         #ax1.imshow(OKim[(npix/2.)-250:,:],extent=[(-1*earthxpos)*kpc_per_pix,(npix-earthxpos)*kpc_per_pix,-250*kpc_per_pix,(npix/2.)*kpc_per_pix],cmap=matplotlib.cm.gray)
         #plt.plot(linspace(-pi,pi,1000),
-        ax1.add_artist(Circle([self.earthrad,0],self.galrad,facecolor='gray',edgecolor='none',zorder=2))
+        ax1.add_artist(Circle([self.earthrad,0],self.galrad,facecolor='gray',edgecolor='none',zorder=zorder))
         #ax1.add_artist(Wedge([0,0],maxdist,0,90,facecolor='white',edgecolor='none'))
 
         self.ax1,self.ax2 = ax1,ax2
 
-    def mark_completeness_zone(self, maxdist=17.5, mindist=5, low_longitude_cutoff=6):
+    def mark_completeness_zone(self, maxdist=17.5, mindist=5, low_longitude_cutoff=6, zorder=3):
         yy,xx = np.indices([self.npix,self.npix])
         rr = np.sqrt((xx-self.center)**2+(yy-self.center)**2)*self.kpc_per_pix
         theta = np.arctan2(xx - self.center, yy - self.center)
@@ -143,22 +143,26 @@ class MilkywayPlot(object):
         xx = xx1+xx2
         obs_curve = (self.galrad**2-(xx-self.earthrad)**2)**0.5 *(xx<=x2)  + (maxdist**2-xx**2)**0.5 * (xx>x2)
         low_curve = (mindist**2-(xx*(xx<=x5))**2)**0.5 * (xx<=x5) + xx*np.sin(anglecut) * (xx>x5)
-        self.ax1.fill_between(xx,low_curve,obs_curve,facecolor='white',edgecolor='none',zorder=3)
+        self.ax1.fill_between(xx,low_curve,obs_curve,facecolor='white',edgecolor='none',zorder=zorder)
         #print "Vertices: " + "\nVertices: ".join(["%f,%f" % (x,y) for (x,y) in zip((x1,x2,x3,x4,x5),(y1,y2,y3,y4,y5))])
 
         xxclose = np.linspace(0,x5,1000)
         high_curve2 = (mindist**2-(xxclose)**2)**0.5 
         low_curve2  = xxclose*np.sin(anglecut)
-        self.ax1.fill_between(xxclose, low_curve2, high_curve2, facecolor='#BBBBBB', edgecolor='none', zorder=4)
+        self.ax1.fill_between(xxclose, low_curve2, high_curve2, facecolor='#BBBBBB', edgecolor='none', zorder=zorder+1)
 
+        self.ax1.axis["lon"] = axis = self.ax1.new_floating_axis(1, maxdist)
+        axis.axes.set_zorder(20)
+        axis.axis.set_zorder(20)
+        axis.set_zorder(20)
 
-    def mark_earth(self):
-        self.ax2.plot(0,0,'o',color='gold',markersize=10,markeredgecolor='gold',markerfacecolor='none',zorder=50,alpha=1,markeredgewidth=2)
-        self.ax2.plot(0,0,'.',color='gold',markersize=3,markeredgecolor='gold',markerfacecolor='gold',zorder=50,alpha=1,markeredgewidth=2)
+    def mark_earth(self,zorder=50):
+        self.ax2.plot(0,0,'o',color='gold',markersize=10,markeredgecolor='gold',markerfacecolor='none',zorder=zorder,alpha=1,markeredgewidth=2)
+        self.ax2.plot(0,0,'.',color='gold',markersize=3,markeredgecolor='gold',markerfacecolor='gold',zorder=zorder,alpha=1,markeredgewidth=2)
 
-    def mark_gc(self):
-        self.ax2.plot(0,8.5,'o',color=(0.3,1,0.3,0.5),markersize=30,markeredgecolor=(0.3,1,0.3,0.5))
-        self.ax2.text(0,8.5,'GC',horizontalalignment='center',verticalalignment='center')
+    def mark_gc(self,zorder=50):
+        self.ax2.plot(0,8.5,'o',color=(0.3,1,0.3,0.5),markersize=30,markeredgecolor=(0.3,1,0.3,0.5),zorder=zorder)
+        self.ax2.text(0,8.5,'GC',horizontalalignment='center',verticalalignment='center',zorder=zorder+1)
 
     def label(self):
         # this results in weird duplication ax1.set_xlabel("Heliocentric Distance (kpc)")
@@ -197,3 +201,9 @@ class MilkywayPlot(object):
         tanpt = kdist.kdist(lon,lat,velocity,silent=True)/1000.
 
         self.ax2.plot(lon,tanpt,'--',color='m', zorder=zorder)
+
+    def plot_londist(self, lon, dist, zorder=105, **kwargs):
+        self.ax2.plot(lon, dist, zorder=zorder, **kwargs)
+
+    def scatter_londist(self, lon, dist, zorder=105, **kwargs):
+        self.ax2.scatter(lon, dist, zorder=zorder, **kwargs)
