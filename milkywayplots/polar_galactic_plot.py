@@ -188,3 +188,12 @@ class MilkywayPlot(object):
         self.add_grid()
         self.mark_corotation()
         self.mark_completeness_zone(**kwargs)
+
+    def plot_tangents(self, npts=100, zorder=105):
+        import kdist
+        lon = np.linspace(0,90,npts)
+        lat = np.zeros(npts)
+        velocity = np.ones(npts) * 1000 # just pick a velocity that's too high
+        tanpt = kdist.kdist(lon,lat,velocity,silent=True)/1000.
+
+        self.ax2.plot(lon,tanpt,'--',color='m', zorder=zorder)
