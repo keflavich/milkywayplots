@@ -21,9 +21,12 @@ def getfile(url,fn=None):
     if fn is None:
         fn = os.path.split(url)[-1]
     if not os.path.exists(fn):
-        with aud.get_readable_fileobj(url) as f:
-            with open(fn,'w') as of:
-                of.write(f.read())
+        import requests
+        response = requests.get(url)
+        response.raise_for_status()
+
+        with open(fn,'wb') as of:
+            of.write(response.content)
 
 
 def get_image(mw_img_url="http://upload.wikimedia.org/wikipedia/commons/0/09/Milky_Way_2005.jpg"):
@@ -35,8 +38,8 @@ def get_image(mw_img_url="http://upload.wikimedia.org/wikipedia/commons/0/09/Mil
     """
     getfile(mw_img_url)
 
-def make_mw_plot(fig=None, mw_img_name = "Milky_Way_2005.jpg",
-        solar_rad=8.5, fignum=5):
+def make_mw_plot(fig=None, mw_img_name="Milky_Way_2005.jpg", solar_rad=8.5,
+                 fignum=5):
     """
     Generate a "Milky Way" plot with Robert Hurt's Milky Way illustration as
     the background.
@@ -116,7 +119,7 @@ def make_mw_plot(fig=None, mw_img_name = "Milky_Way_2005.jpg",
                 )
 
 
-    ax = SubplotHost(fig, 1, 1, 1, grid_helper=grid_helper, axisbg='#333333')
+    ax = SubplotHost(fig, 1, 1, 1, grid_helper=grid_helper)
     fig.add_subplot(ax)
     # ax.transData is still a (rectlinear) pixel coordinate. Only the
     # grids are done in galactocentric coordinate.
@@ -152,12 +155,12 @@ def make_mw_plot(fig=None, mw_img_name = "Milky_Way_2005.jpg",
     ax.parasites.append(hc_polar)
 
 
-    return ax, ax_pixgrid, gc_polar, hc_polar
+    return ax, ax_pixgrid, gc_polar, hc_polar, tr, tr_helio
 
 if __name__=="__main__":
     get_image()
 
-    ax, ax_pixgrid, gcp,hcp = make_mw_plot()
+    ax, ax_pixgrid, gcp, hcp, tr_gal, tr_helio = make_mw_plot()
     ax.grid(color="w")
     ax_pixgrid.grid(color="r")
     ax_pixgrid.axis[:].major_ticklabels.set_color("r")
