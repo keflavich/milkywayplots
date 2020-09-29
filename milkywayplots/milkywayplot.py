@@ -60,7 +60,7 @@ def make_mw_plot(fig=None, mw_img_name="Milky_Way_2005.jpg", solar_rad=8.5,
     """
 
     # load image
-    mw = np.array(PIL.Image.open(mw_img_name))[:,::-1]
+    mw = np.array(PIL.Image.open(mw_img_name))
 
     # set some constants
     npix = mw.shape[0] # must be symmetric
