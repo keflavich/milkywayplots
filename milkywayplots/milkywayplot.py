@@ -23,9 +23,12 @@ def getfile(url, fn=None):
         import requests
         response = requests.get(url)
         response.raise_for_status()
+        assert len(response.content) > 0
 
         with open(fn, 'wb') as of:
             of.write(response.content)
+
+    return fn
 
 
 def get_image(mw_img_url="http://upload.wikimedia.org/wikipedia/commons/0/09/Milky_Way_2005.jpg"):
@@ -35,7 +38,11 @@ def get_image(mw_img_url="http://upload.wikimedia.org/wikipedia/commons/0/09/Mil
     Annotated version here:
     http://upload.wikimedia.org/wikipedia/commons/8/89/236084main_MilkyWay-full-annotated.jpg
     """
-    getfile(mw_img_url)
+    fn = getfile(mw_img_url)
+    # just check that it's the right file... won't work with any others
+    # (remove this code if you change the file)
+    assert fn == 'Milky_Way_2005.jpg'
+    return fn
 
 def make_mw_plot(fig=None, mw_img_name="Milky_Way_2005.jpg", solar_rad=8.5,
                  fignum=5):
