@@ -14,16 +14,18 @@ from matplotlib.transforms import Affine2D
 # annotated version
 # http://upload.wikimedia.org/wikipedia/commons/8/89/236084main_MilkyWay-full-annotated.jpg
 
-import astropy.utils.data as aud
 import os
 
-def getfile(url,fn=None):
+def getfile(url, fn=None):
     if fn is None:
         fn = os.path.split(url)[-1]
     if not os.path.exists(fn):
-        with aud.get_readable_fileobj(url) as f:
-            with open(fn, 'wb') as of:
-                of.write(f.read())
+        import requests
+        response = requests.get(url)
+        response.raise_for_status()
+
+        with open(fn, 'wb') as of:
+            of.write(response.content)
 
 
 def get_image(mw_img_url="http://upload.wikimedia.org/wikipedia/commons/0/09/Milky_Way_2005.jpg"):
@@ -35,8 +37,8 @@ def get_image(mw_img_url="http://upload.wikimedia.org/wikipedia/commons/0/09/Mil
     """
     getfile(mw_img_url)
 
-def make_mw_plot(fig=None, mw_img_name = "Milky_Way_2005.jpg",
-        solar_rad=8.5, fignum=5):
+def make_mw_plot(fig=None, mw_img_name="Milky_Way_2005.jpg", solar_rad=8.5,
+                 fignum=5):
     """
     Generate a "Milky Way" plot with Robert Hurt's Milky Way illustration as
     the background.
@@ -57,7 +59,7 @@ def make_mw_plot(fig=None, mw_img_name = "Milky_Way_2005.jpg",
     """
 
     # load image
-    mw = np.array(PIL.Image.open(mw_img_name))[:,::-1]
+    mw = np.array(PIL.Image.open(mw_img_name))
 
     # set some constants
     npix = mw.shape[0] # must be symmetric
@@ -65,7 +67,7 @@ def make_mw_plot(fig=None, mw_img_name = "Milky_Way_2005.jpg",
     gc_loc = [x/2 for x in mw.shape]
 
     # Sun is at 0.691 (maybe really 0.7?) length of image
-    sun_loc = mw.shape[0]/2,int(mw.shape[1]*0.691)
+    sun_loc = mw.shape[0]/2, int(mw.shape[1]*0.691)
     # determine scaling
     kpc_per_pix = solar_rad / (sun_loc[1]-gc_loc[1])
     boxsize = npix*kpc_per_pix
@@ -108,21 +110,22 @@ def make_mw_plot(fig=None, mw_img_name = "Milky_Way_2005.jpg",
     # that of mpl's, and you cannot directly use mpl's Locator and
     # Formatter here (but may be possible in the future).
 
-    grid_helper = GridHelperCurveLinear(tr,
-                extreme_finder=extreme_finder,
-                grid_locator1=grid_locator1,
-                tick_formatter1=tick_formatter1,
-                #tick_formatter2=matplotlib.ticker.FuncFormatter(lambda x: x * kpc_per_pix)
-                )
+    grid_helper = GridHelperCurveLinear(
+        tr,
+        extreme_finder=extreme_finder,
+        grid_locator1=grid_locator1,
+        tick_formatter1=tick_formatter1,
+        # tick_formatter2=matplotlib.ticker.FuncFormatter(lambda x: x * kpc_per_pix)
+    )
 
 
-    ax = SubplotHost(fig, 1, 1, 1, grid_helper=grid_helper, axisbg='#333333')
+    ax = SubplotHost(fig, 1, 1, 1, grid_helper=grid_helper)
     fig.add_subplot(ax)
     # ax.transData is still a (rectlinear) pixel coordinate. Only the
     # grids are done in galactocentric coordinate.
 
     # show the image
-    ax.imshow(mw,extent=[-boxsize/2,boxsize/2,-boxsize/2,boxsize/2])
+    ax.imshow(mw, extent=[-boxsize/2, boxsize/2, -boxsize/2, boxsize/2])
 
     ax_pixgrid = ax.twin() # simple twin will give you a twin axes,
                            # but with normal grids.
@@ -131,9 +134,10 @@ def make_mw_plot(fig=None, mw_img_name = "Milky_Way_2005.jpg",
     # with new transform.
 
     # need to rotate by -90 deg to get into the standard convention
-    tr_helio = Affine2D().scale(np.pi/180., 1.).translate(-np.pi/2.,0) + \
-               PolarAxes.PolarTransform() + \
-               Affine2D().translate(0,solar_rad)
+    tr_helio = (Affine2D().scale(np.pi/180., 1.).translate(-np.pi/2., 0) +
+                PolarAxes.PolarTransform() +
+                Affine2D().translate(0, solar_rad)
+               )
     # Note that the transform is from the heliocentric coordinate to
     # the pixel coordinate of ax (i.e., ax.transData).
 
@@ -152,12 +156,12 @@ def make_mw_plot(fig=None, mw_img_name = "Milky_Way_2005.jpg",
     ax.parasites.append(hc_polar)
 
 
-    return ax, ax_pixgrid, gc_polar, hc_polar
+    return ax, ax_pixgrid, gc_polar, hc_polar, tr, tr_helio
 
 if __name__=="__main__":
     get_image()
 
-    ax, ax_pixgrid, gcp,hcp = make_mw_plot()
+    ax, ax_pixgrid, gcp, hcp, tr_gal, tr_helio = make_mw_plot()
     ax.grid(color="w")
     ax_pixgrid.grid(color="r")
     ax_pixgrid.axis[:].major_ticklabels.set_color("r")
