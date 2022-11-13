@@ -22,7 +22,7 @@ def getfile(url,fn=None):
         fn = os.path.split(url)[-1]
     if not os.path.exists(fn):
         with aud.get_readable_fileobj(url) as f:
-            with open(fn,'w') as of:
+            with open(fn, 'wb') as of:
                 of.write(f.read())
 
 
