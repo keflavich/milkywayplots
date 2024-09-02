@@ -11,7 +11,7 @@ from mpl_toolkits.axisartist import SubplotHost
 try:
     from mpl_toolkits.axisartist import ParasiteAxesAuxTrans
 except ImportError:
-    from mpl_toolkits.axes_grid1.parasite_axes import ParasiteAxesBase as ParasiteAxesAuxTrans
+    from mpl_toolkits.axes_grid1.parasite_axes import ParasiteAxes
 
 import  mpl_toolkits.axisartist.angle_helper as angle_helper
 from matplotlib.projections import PolarAxes
@@ -74,7 +74,10 @@ def make_polar_axis(figure):
     # let bottom axis shows ticklabels for 2nd coordinate (radius)
     ax1.axis["bottom"].get_helper().nth_coord_ticks=1
 
-    ax2 = ParasiteAxesAuxTrans(ax1, tr, "equal")
+    try:
+        ax2 = ParasiteAxesAuxTrans(ax1, tr, "equal")
+    except NameError:
+        ax2 = ParasiteAxes(parent_axes=ax1, aux_transform=tr, viewlim_mode='equal')
 
     ax1.parasites.append(ax2)
 

@@ -9,7 +9,7 @@ from mpl_toolkits.axisartist import SubplotHost
 try:
     from mpl_toolkits.axisartist import ParasiteAxesAuxTrans
 except ImportError:
-    from mpl_toolkits.axes_grid1.parasite_axes import ParasiteAxesBase as ParasiteAxesAuxTrans
+    from mpl_toolkits.axes_grid1.parasite_axes import ParasiteAxes
 
 import mpl_toolkits.axisartist.angle_helper as angle_helper
 from matplotlib.projections import PolarAxes
@@ -159,12 +159,18 @@ def make_mw_plot(fig=None, mw_img_name="Milky_Way_2005.jpg", solar_rad=8.5,
     # coordinates.
 
     # A parasite axes with given transform
-    gc_polar = ParasiteAxesAuxTrans(ax, tr, "equal")
+    try:
+        gc_polar = ParasiteAxesAuxTrans(ax, tr, "equal")
+    except NameError:
+        gc_polar = ParasiteAxes(parent_axes=ax, aux_transform=tr, viewlim_mode="equal")
     ax.parasites.append(gc_polar)
     # note that ax2.transData == tr + galactocentric_axis.transData
     # Anthing you draw in ax2 will match the ticks and grids of galactocentric_axis.
 
-    hc_polar = ParasiteAxesAuxTrans(ax, tr_helio, "equal")
+    try:
+        hc_polar = ParasiteAxesAuxTrans(ax, tr_helio, "equal")
+    except NameError:
+        hc_polar = ParasiteAxes(parent_axes=ax, aux_transform=tr_helio, viewlim_mode="equal")
     ax.parasites.append(hc_polar)
 
 
