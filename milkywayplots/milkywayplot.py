@@ -5,7 +5,11 @@ import matplotlib.pyplot as plt
 
 from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
 
-from mpl_toolkits.axisartist import SubplotHost, ParasiteAxesAuxTrans
+from mpl_toolkits.axisartist import SubplotHost
+try:
+    from mpl_toolkits.axisartist import ParasiteAxesAuxTrans
+except ImportError:
+    from mpl_toolkits.axes_grid1.parasite_axes import ParasiteAxesBase as ParasiteAxesAuxTrans
 
 import mpl_toolkits.axisartist.angle_helper as angle_helper
 from matplotlib.projections import PolarAxes
@@ -21,7 +25,8 @@ def getfile(url, fn=None):
         fn = os.path.split(url)[-1]
     if not os.path.exists(fn):
         import requests
-        response = requests.get(url)
+        headers = {'User-Agent': 'milkywayplots (https://github.com/keflavich/milkywayplots)'}
+        response = requests.get(url, headers=headers)
         response.raise_for_status()
         assert len(response.content) > 0
 

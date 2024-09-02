@@ -7,7 +7,11 @@ import numpy as np
 from  mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
 from mpl_toolkits.axisartist import Subplot
 
-from mpl_toolkits.axisartist import SubplotHost, ParasiteAxesAuxTrans
+from mpl_toolkits.axisartist import SubplotHost
+try:
+    from mpl_toolkits.axisartist import ParasiteAxesAuxTrans
+except ImportError:
+    from mpl_toolkits.axes_grid1.parasite_axes import ParasiteAxesBase as ParasiteAxesAuxTrans
 
 import  mpl_toolkits.axisartist.angle_helper as angle_helper
 from matplotlib.projections import PolarAxes
