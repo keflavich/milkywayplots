@@ -133,7 +133,7 @@ def make_mw_plot(fig=None, mw_img_name="Milky_Way_2005.jpg", solar_rad=8.5,
 
     ax = SubplotHost(fig, 1, 1, 1, grid_helper=grid_helper)
     fig.add_subplot(ax)
-    # ax.transData is still a (rectlinear) pixel coordinate. Only the
+    # ax.transData is still a (rectilinear) pixel coordinate. Only the
     # grids are done in galactocentric coordinate.
 
     # show the image
